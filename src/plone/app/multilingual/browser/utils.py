@@ -56,8 +56,6 @@ class BabelUtils(BrowserView):
 
     # BBB
     def gtenabled(self):
-        # TEMP: debugging
-        return True
         utility = queryUtility(IExternalTranslationService, name="google_translate")
         return utility and utility.is_available()
 

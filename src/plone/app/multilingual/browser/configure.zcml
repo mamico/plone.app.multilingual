@@ -235,7 +235,15 @@
   <!-- DEXTERITY -->
   <configure zcml:condition="installed plone.dexterity">
 
-    <!-- GTranslate Service -->
+    <browser:page
+        name="babel_translate"
+        for="plone.dexterity.interfaces.IDexterityContent"
+        class=".translate.TranslationServiceView"
+        permission="cmf.ModifyPortalContent"
+        />
+
+
+    <!-- BBB: GTranslate Service -->
     <browser:page
         name="gtranslation_service"
         for="plone.dexterity.interfaces.IDexterityContent"
@@ -284,6 +292,13 @@
       for="*"
       class=".utils.BabelUtils"
       permission="zope2.View"
+      />
+
+  <browser:page
+      name="babel_options"
+      for="*"
+      class=".translate.TranslationServiceOptionsView"
+      permission="cmf.ModifyPortalContent"
       />
 
   <!-- Migration Views -->

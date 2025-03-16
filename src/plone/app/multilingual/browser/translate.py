@@ -54,8 +54,6 @@ def translate_text(original_text, source_language, target_language, service=None
 
 
 class TranslationServiceView(BrowserView):
-    service = None
-
     def __call__(self):
         if self.request.method != "POST" and not (
             "field" in self.request.form.keys()
@@ -78,22 +76,25 @@ class TranslationServiceView(BrowserView):
             lang_source = self.request.form["lang_source"]
             orig_object = manager.get_translation(lang_source)
             field = self.request.form["field"].split(".")[-1]
+            service = self.request.form.get("service")
             if hasattr(orig_object, field):
                 question = getattr(orig_object, field, "") or ""
                 if hasattr(question, "raw"):
                     question = question.raw
             else:
                 return _("Invalid field")
-            translation = translate_text(question, lang_source, lang_target, self.service)
+            translation = translate_text(question, lang_source, lang_target, service)
             if translation is None:
                 return json.dumps({"data": ""})
 
             return json.dumps({"data": translation})
 
+
 # BBB
 class gtranslation_service_dexterity(TranslationServiceView):
-    # service = "google_translate"
-    pass
+    def __call__(self):
+        self.request.form["service"] = "google_translate"
+        return super().__call__()
 
 
 class TranslationForm(BrowserView):
@@ -108,3 +109,19 @@ class TranslationForm(BrowserView):
             baseUrl = new_parent.absolute_url()
             url = f"{baseUrl}/++addtranslation++{IUUID(context)}"
             return self.request.response.redirect(url)
+        
+
+class TranslationServiceOptionsView(BrowserView):  
+    def get_options(self):
+        return [
+            {
+                "text": getattr(adapter, "label", name),
+                "value": name, 
+            }            
+            for name, adapter in getUtilitiesFor(IExternalTranslationService)
+            if adapter.is_available()
+        ]
+
+    def __call__(self):      
+        self.request.response.setHeader('Content-Type', 'application/json')
+        return json.dumps(self.get_options())

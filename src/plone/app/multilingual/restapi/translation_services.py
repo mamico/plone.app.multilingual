@@ -15,7 +15,6 @@ class TranslationServices(Service):
             item["is_available"] = adapter.is_available()
             item["available_languages"] = adapter.available_languages()
             item["name"] = name
-
             result.append(item)
 
         return sorted(result, key=lambda x: x["order"], reverse=True)
